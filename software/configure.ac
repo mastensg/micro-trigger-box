@@ -1,0 +1,10 @@
+AC_INIT(trigger, 0.1.0)
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+
+AC_GNU_SOURCE
+
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+
+AC_OUTPUT(Makefile)
