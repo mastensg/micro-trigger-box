@@ -55,7 +55,7 @@ ethernet_init(const char *interface)
 
     sock.address.sll_ifindex = if_idx.ifr_ifindex;
     sock.address.sll_halen = ETH_ALEN;
-    sock.address.sll_protocol = htons(0x1337);
+    sock.address.sll_protocol = htons(0x4d53);
     sock.address.sll_addr[0] = 0xff;
     sock.address.sll_addr[1] = 0xff;
     sock.address.sll_addr[2] = 0xff;
