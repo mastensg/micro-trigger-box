@@ -23,7 +23,7 @@ struct
 } sock;
 
 static void
-realtime()
+realtime_init()
 {
     struct sched_param sp;
 
@@ -66,11 +66,9 @@ ethernet_init(const char *interface)
 }
 
 static void
-trigger()
+ethernet_broadcast(uint8_t framerate)
 {
     ssize_t numbytes;
-    // TODO: arbitrary framerate
-    static const uint8_t packet[1] = {50};
 
 #ifdef DEBUG
     struct timespec ts;
@@ -78,7 +76,7 @@ trigger()
     fprintf(stderr, "0.%09ld\n", ts.tv_nsec);
 #endif
 
-    numbytes = sendto(sock.fd, packet, sizeof(packet), 0,
+    numbytes = sendto(sock.fd, &framerate, sizeof(framerate), 0,
             (struct sockaddr *)&sock.address,
             sizeof(sock.address));
 
@@ -106,18 +104,6 @@ sleep_until(long then)
 }
 
 static void
-spin_until(long then)
-{
-    struct timespec tq;
-
-    do
-    {
-        clock_gettime(CLOCK_REALTIME, &tq);
-    }
-    while (tq.tv_nsec < then);
-}
-
-static void
 next_second()
 {
     struct timespec tq, tp;
@@ -132,47 +118,30 @@ next_second()
     while (tp.tv_nsec > tq.tv_nsec);
 }
 
-static void
-until(long then)
+int
+main(int argc, char *argv[])
 {
-    struct timespec tq;
+    uint8_t framerate;
+    char *end, *interface;
 
-    clock_gettime(CLOCK_REALTIME, &tq);
-    if (tq.tv_nsec > then)
-        next_second();
+    if (3 != argc)
+        errx(EXIT_FAILURE, "Usage: %s interface framerate\n\nExample: %s eth0 30", argv[0], argv[0]);
 
-    sleep_until(then);
-    spin_until(then);
-}
+    interface = argv[1];
 
-static void
-loop(int frequency, void (*handler)(void))
-{
-    uint32_t period;
-    int i;
+    framerate = strtol(argv[2], &end, 10);
+    if (*end)
+        errx(EXIT_FAILURE, "Framerate must be an integer");
 
-    period = second / frequency;
+    realtime_init();
+
+    ethernet_init(interface);
 
     for (;;)
     {
         next_second();
-        handler();
-
-        for (i = 1; i < frequency; ++i)
-        {
-            until(i * period);
-            //spin_until(i * period);
-            handler();
-        }
+        ethernet_broadcast(framerate);
     }
-}
-
-int
-main(int argc, char *argv[])
-{
-    realtime();
-    ethernet_init("eth1");
-    loop(1, trigger);
 
     return EXIT_SUCCESS;
 }
