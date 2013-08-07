@@ -30,12 +30,13 @@ realtime()
     if (geteuid())
         errx(EXIT_FAILURE, "not root");
 
-    sp.sched_priority = sched_get_priority_max(SCHED_FIFO);
+    if (-1 == (sp.sched_priority = sched_get_priority_max(SCHED_FIFO)))
+        err(EXIT_FAILURE, "sched_get_priority_max");
 
     if (sched_setscheduler(0, SCHED_FIFO, &sp))
         err(EXIT_FAILURE, "sched_setscheduler");
 
-    if (mlockall(MCL_CURRENT | MCL_FUTURE))
+    if (-1 == mlockall(MCL_CURRENT | MCL_FUTURE))
         err(EXIT_FAILURE, "mlockall");
 }
 
