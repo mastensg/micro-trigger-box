@@ -48,11 +48,11 @@ ethernet_init(const char *interface)
     if (-1 == (sock.fd = socket(AF_PACKET, SOCK_DGRAM, 0)))
         err(EXIT_FAILURE, "socket");
 
-    // TODO: rewrite this block.
     memset(&if_idx, 0, sizeof(if_idx));
-    strncpy(if_idx.ifr_name, interface, 7);
-    if (ioctl(sock.fd, SIOCGIFINDEX, &if_idx) < 0)
-        perror("SIOCGIFINDEX");
+    strncpy(if_idx.ifr_name, interface, IFNAMSIZ);
+
+    if (-1 == ioctl(sock.fd, SIOCGIFINDEX, &if_idx))
+        err(EXIT_FAILURE, "SIOCGIFINDEX");
 
     sock.address.sll_ifindex = if_idx.ifr_ifindex;
     sock.address.sll_halen = ETH_ALEN;
@@ -128,6 +128,8 @@ main(int argc, char *argv[])
         errx(EXIT_FAILURE, "Usage: %s interface framerate\n\nExample: %s eth0 30", argv[0], argv[0]);
 
     interface = argv[1];
+    if (IFNAMSIZ == strnlen(interface, IFNAMSIZ))
+        errx(EXIT_FAILURE, "Too long interface name");
 
     framerate = strtol(argv[2], &end, 10);
     if (*end)
