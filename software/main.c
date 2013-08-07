@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <err.h>
 #include <stdio.h>
 #include <sched.h>
@@ -13,8 +14,6 @@
 #include <netpacket/packet.h>
 #include <net/if.h> 
 #include <netinet/ether.h>
-
-const uint32_t second = 1000000000;
 
 struct 
 {
@@ -70,70 +69,67 @@ ethernet_broadcast(uint8_t framerate)
 {
     ssize_t numbytes;
 
-#ifdef DEBUG
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    fprintf(stderr, "0.%09ld\n", ts.tv_nsec);
-#endif
-
     numbytes = sendto(sock.fd, &framerate, sizeof(framerate), 0,
             (struct sockaddr *)&sock.address,
             sizeof(sock.address));
 
     if (-1 == numbytes)
-        err(EXIT_FAILURE, "sendto");
-}
-
-static void
-sleep_until(long then)
-{
-    static const uint32_t spinns = 10000000;
-    struct timespec tq;
-    int32_t sleepns;
-    long now;
-
-    clock_gettime(CLOCK_REALTIME, &tq);
-    now = tq.tv_nsec;
-
-    if (then < now)
-        then += second;
-
-    sleepns = then - spinns - now;
-    if (sleepns > 0)
-        usleep(sleepns / 1000);
+        warn("sendto");
 }
 
 static void
 next_second()
 {
-    struct timespec tq, tp;
+    const long one_second = 1000000000;
+    const long time_to_spin = 10000000;
+    struct timespec time_of_call, length_of_sleep, time_now;
 
-    sleep_until(0);
+    if (-1 == clock_gettime(CLOCK_REALTIME, &time_of_call))
+        err(EXIT_FAILURE, "clock_gettime");
 
-    clock_gettime(CLOCK_REALTIME, &tq);
+    length_of_sleep.tv_sec = 0;
+    length_of_sleep.tv_nsec = one_second - time_to_spin - time_of_call.tv_nsec;
+
+    assert(one_second > length_of_sleep.tv_nsec);
+
+    if (0 < length_of_sleep.tv_nsec)
+    {
+        if (-1 == nanosleep(&length_of_sleep, NULL))
+            warn("nanosleep");
+    }
+
     do
     {
-        clock_gettime(CLOCK_REALTIME, &tp);
+        if (-1 == clock_gettime(CLOCK_REALTIME, &time_now))
+            err(EXIT_FAILURE, "clock_gettime");
     }
-    while (tp.tv_nsec > tq.tv_nsec);
+    while (time_now.tv_sec == time_of_call.tv_sec);
 }
 
 int
 main(int argc, char *argv[])
 {
-    uint8_t framerate;
-    char *end, *interface;
+    long framerate;
+    char *end, *interface, usage[256];
+
+    sprintf(usage, "\nUsage: %s interface framerate\n\n"
+            "For example: %s eth0 30", argv[0], argv[0]);
 
     if (3 != argc)
-        errx(EXIT_FAILURE, "Usage: %s interface framerate\n\nExample: %s eth0 30", argv[0], argv[0]);
+        errx(EXIT_FAILURE, "Wrong number of arguments\n%s", usage);
 
     interface = argv[1];
+
     if (IFNAMSIZ == strnlen(interface, IFNAMSIZ))
-        errx(EXIT_FAILURE, "Too long interface name");
+        errx(EXIT_FAILURE, "Too long interface name\n%s", usage);
+
+    if (4 == strnlen(argv[2], 4))
+        errx(EXIT_FAILURE, "Too long framerate number\n%s", usage);
 
     framerate = strtol(argv[2], &end, 10);
-    if (*end)
-        errx(EXIT_FAILURE, "Framerate must be an integer");
+
+    if (*end || framerate < 1 || framerate > 255)
+        errx(EXIT_FAILURE, "Framerate must be [1 - 255]\n%s", usage);
 
     realtime_init();
 
