@@ -1,0 +1,22 @@
+.TH TRIGGER 1 trigger\-@VERSION@
+.SH NAME
+trigger \- Synchronize Basler video cameras over Ethernet
+.SH SYNOPSIS
+.B trigger
+interface framerate
+.SH DESCRIPTION
+.B trigger
+broadcasts an ethernet packet every second to all cameras connected to the
+specified interface. The packet contains the framerate, as specified on the
+command line.
+
+This program needs to run as root in order to send raw ethernet packets, and to
+acquire realtime priority for precise timekeeping.
+.SH EXAMPLES
+.B trigger eth0 30
+
+Synchronize the cameras connected to eth0 at 30 frames per second.
+.SH REPORTING BUGS
+Please report bugs to Carsten Griwodz <griff@simula.no>.
+.SH AUTHOR
+Written by Martin Stensgård <mastensg@ping.uio.no>
