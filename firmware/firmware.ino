@@ -92,7 +92,7 @@ setup()
 void
 loop()
 {
-    int8_t ret;
+    int16_t ret;
     uint32_t i, t;
 
     /* Wait for once-a-second packet. */
