@@ -13,3 +13,7 @@
 /missing
 trigger
 /trigger.1
+/debian/dirs
+/debian/docs
+/debian/files
+/debian/trigger.substvars
