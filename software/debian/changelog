@@ -1,0 +1,5 @@
+trigger (0.1.0-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Martin Stensgård <mastensg@ping.uio.no>  Wed, 31 Jul 2013 16:19:46 +0200

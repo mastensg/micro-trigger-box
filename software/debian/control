@@ -1,0 +1,14 @@
+Source: trigger
+Section: video
+Priority: extra
+Maintainer: Martin Stensgård <mastensg@ping.uio.no>
+Build-Depends: debhelper (>= 8.0.0), autotools-dev
+Standards-Version: 3.9.3
+Homepage: http://simula.no/
+
+Package: trigger
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Synchronize Basler video cameras over Ethernet
+ The program in this package is used to synchronize Basler video cameras to the
+ system's clock.
