@@ -98,6 +98,12 @@ ethernet_broadcast(uint8_t framerate)
 {
     ssize_t numbytes;
 
+#ifndef NDEBUG
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    fprintf(stderr, "0.%09ld\n", ts.tv_nsec);
+#endif
+
     numbytes = sendto(sock.fd, &framerate, sizeof(framerate), 0,
             (struct sockaddr *)&sock.address,
             sizeof(sock.address));
