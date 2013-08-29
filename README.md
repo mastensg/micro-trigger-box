@@ -20,6 +20,7 @@ Software
 
     sudo apt-get install dpkg-dev
     cd software
+    autoreconf -f -i
     dpkg-buildpackage
     sudo dpkg -i ../trigger_VERSION_ARCHITECTURE.deb
 
