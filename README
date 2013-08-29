@@ -17,3 +17,16 @@ or upload the firmware with the Arduino IDE.
 
 Software
 --------
+
+    sudo apt-get install dpkg-dev
+    cd software
+    dpkg-buildpackage
+    sudo dpkg -i ../trigger_VERSION_ARCHITECTURE.deb
+
+or
+
+    cd software
+    autoreconf -f -i
+    ./configure
+    make
+    sudo make install
