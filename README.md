@@ -18,7 +18,7 @@ or upload the firmware with the Arduino IDE.
 Software
 --------
 
-    sudo apt-get install dpkg-dev
+    sudo apt-get install debhelper dpkg-dev
     cd software
     autoreconf -f -i
     dpkg-buildpackage
