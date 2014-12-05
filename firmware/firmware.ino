@@ -35,11 +35,13 @@
 #include <avr/interrupt.h>
 
 #define CAMERA 8
+#define LED 9
 
 SOCKET s;
 byte rbuf[1500 + 14];
 int rbuflen;
 uint8_t calibrated = 0;
+uint8_t led_state = 0;
 uint32_t second;
 uint32_t fps;
 
@@ -74,6 +76,9 @@ setup()
 {
     pinMode(CAMERA, OUTPUT);
     digitalWrite(CAMERA, LOW);
+
+    pinMode(LED, OUTPUT);
+    digitalWrite(LED, LOW);
 
     W5100.init();
     W5100.writeSnMR(s, SnMR::MACRAW); 
@@ -138,4 +143,7 @@ loop()
 
         trigger();
     }
+
+    led_state = !led_state;
+    digitalWrite(LED, led_state);
 }
